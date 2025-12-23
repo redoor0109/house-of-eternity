@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>영원의 집 : 사라지는 것들을 위한 영원한 기록</title>
+
+<style>
+:root{
+  --bg:#000;
+  --fg:#fff;
+  --muted:rgba(255,255,255,.6);
+  --line:rgba(255,255,255,.18);
+  --radius:12px;
+  --max:900px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--fg);
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",system-ui,sans-serif;
+  line-height:1.6;
+}
+
+a{color:var(--fg);text-decoration:none}
+a:hover{ text-decoration: underline; text-underline-offset: 3px; }
+
+.container{
+  width:min(var(--max),calc(100% - 32px));
+  margin:0 auto;
+}
+
+h1{font-size:38px;letter-spacing:.12em;margin:0}
+h2{font-size:22px;letter-spacing:.08em;margin:0}
+p{margin:0}
+@media(max-width:640px){ h1{font-size:34px;} }
+
+/* Views */
+.view{ display:none; min-height: calc(100vh - 24px); }
+.view.is-active{ display:block; }
+
+/* Fade transition helper */
+.fade{ opacity:0; transform: translateY(6px); transition: opacity .25s ease, transform .25s ease; }
+.view.is-active .fade{ opacity:1; transform: translateY(0); }
+
+/* Flash overlay (for gate transition) */
+.flash{
+  position:fixed;
+  inset:0;
+  background:#000;
+  opacity:0;
+  pointer-events:none;
+  z-index:999;
+  transition: opacity .12s linear;
+}
+.flash.is-on{ opacity:1; }
+
+/* Entrance hero */
+.hero{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:26px;
+  margin: 0 auto;
+}
+
+.hero-copy{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  align-items:center;
+}
+
+.hero-q{
+  font-size: 14px;
+  letter-spacing: .06em;
+  color: var(--muted);
+  text-align:center;
+}
+
+.hero-sub{
+  font-size: 13px;
+  letter-spacing: .08em;
+  color: var(--fg);
+  opacity:.9;
+}
+
+.divider{
+  width: 160px;
+  height: 1px;
+  background: var(--line);
+  margin-top: 10px;
+}
+
+/* Gate */
+.entrance{ padding-top: 0; text-align:center; }
+.gate-wrap{
+  margin-top: 120px;
+  display:flex;
+  justify-content:center;
+}
+.gate-frame{
+  width: 200px;
+  height: 320px;
+  border:1px solid var(--line);
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  position: relative;
+}
+
+/* Door */
+.gate-door{
+  width: 160px;
+  height: 260px;
+  margin-bottom: 20px;
+  background: var(--fg);
+  cursor:pointer;
+  position: relative;
+  transform-origin: left center;
+  transition: transform .6s ease;
+}
+.gate-door:hover{ transform: perspective(900px) rotateY(-6deg); }
+
+/* When opening */
+body.gate-open .gate-door{ transform: perspective(900px) rotateY(-72deg); }
+
+/* Handle */
+.gate-handle{
+  position:absolute;
+  right: 22px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  border: 2px solid rgba(0,0,0,.85);
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+/* Light glow from the gap */
+.gate-glow{
+  position:absolute;
+  left: -2px;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  background: linear-gradient(to right, rgba(255,255,255,0.55), rgba(255,255,255,0.0));
+  opacity: 0.15;
+  transition: opacity .25s ease, width .6s ease;
+}
+body.gate-open .gate-glow{ opacity: 0.9; width: 22px; }
+
+/* Hall */
+.hall{ padding-top: 72px; text-align:center; }
+.hall-frame{ max-width: 420px; margin: 0 auto; padding: 12px 20px 24px; border: none; }
+
+/* Door grid (mobile-first) */
+.door-row{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px; /* mobile tighter spacing */
+}
+
+/* Base door tile */
+.door{
+  position:relative;
+  border:1px solid var(--line);
+  padding:0;
+  height:250px; /* mobile-optimized height */
+  cursor:pointer;
+  transition: transform .2s ease, border-color .2s ease;
+  background:var(--fg);
+  color:#000;
+  overflow:hidden;
+}
+
+.door .label{
+  position:absolute;
+  top:28px;
+  left:0; right:0;
+  text-align:center;
+  font-size:13px;
+  letter-spacing:.12em;
+  z-index:3;
+}
+
+.door .handle{
+  position:absolute;
+  right:18px;
+  top:50%;
+  width:10px;
+  height:10px;
+  border:1.5px solid rgba(0,0,0,.8);
+  border-radius:50%;
+  transform:translateY(-50%);
+  z-index:3;
+}
+
+.program-door:nth-child(even) .handle{
+  right: auto;
+  left: 18px;
+}
+
+.door:hover{ transform:translateY(-2px); border-color:#000; }
+
+/* Program: door leaf rotates fully, content sits BEHIND */
+.program-door{ background: transparent; }
+
+.program-door .door-back{
+  position:absolute;
+  inset:0;
+  background:#fff;
+  color:#000;
+  padding:30px 8px 14px;
+  opacity:0;
+  pointer-events:none;
+  transition: opacity .25s ease .35s;
+  z-index:1;
+  font-size: 13px;
+}
+
+.program-door .door-back strong{
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.program-door .door-leaf{
+  position:absolute;
+  inset:0;
+  background:#fff;
+  transition: transform .8s ease;
+  z-index:2;
+}
+
+.block a{
+  color: #394DD4;         
+}
+
+/* LEFT column doors: hinge on LEFT, open to the LEFT */
+.program-door:nth-child(odd) .door-leaf{ transform-origin: left center; }
+.program-door:nth-child(odd).is-open .door-leaf{ transform: perspective(1200px) rotateY(-120deg); }
+
+/* RIGHT column doors: hinge on RIGHT, open to the RIGHT */
+.program-door:nth-child(even) .door-leaf{ transform-origin: right center; }
+.program-door:nth-child(even).is-open .door-leaf{ transform: perspective(1200px) rotateY(120deg); }
+
+/* Reveal content only when opened */
+.program-door.is-open .door-back{ opacity:1; pointer-events:auto; }
+
+/* Rooms */
+.room{ padding-top: 60px; }
+.room-head{ margin-bottom: 30px; display:flex; justify-content:space-between; align-items:baseline; gap: 12px; }
+.hint{ font-size:12px; color: var(--muted); }
+
+.info-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:24px; }
+@media(max-width:640px){ .info-grid{grid-template-columns:1fr} }
+.block h3{ font-size:12px; letter-spacing:.1em; margin:0 0 6px; }
+.block p{ color:var(--muted) }
+.note{ margin-top:32px; padding-top:24px; border-top:1px solid var(--line); color:var(--muted); }
+
+footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center; color:var(--muted); }
+
+/* Corridor */
+.corridor{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  background: var(--bg);
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 16px;
+}
+.corridor button{
+  background:none;
+  border:1px solid var(--line);
+  color: var(--fg);
+  width:44px;height:44px;
+  border-radius:50%;
+  cursor:pointer;
+}
+.corridor .where{ font-size:12px; color:var(--muted); letter-spacing:.08em; }
+</style>
+</head>
+
+<body>
+<div class="flash" id="flash" aria-hidden="true"></div>
+
+<div class="container">
+
+  <!-- VIEW: Entrance (gate) -->
+  <main class="view is-active" id="view-entrance" data-view>
+    <section class="entrance" aria-label="영원의 집 입구">
+      <div class="hero fade">
+        <div class="gate-wrap">
+          <div class="gate-frame">
+            <div class="gate-door" id="gateDoor" role="button" tabindex="0" aria-label="대문 열기">
+              <div class="gate-handle"></div>
+              <div class="gate-glow"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-copy">
+          <div class="hero-q">영원의 집으로 들어가시겠습니까?</div>
+          <div class="hero-sub">문을 열어주세요.</div>
+          <div class="divider" aria-hidden="true"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- VIEW: Hall (4 doors) -->
+  <main class="view" id="view-hall" data-view>
+    <section class="hall" aria-label="영원의 집">
+      <div class="hall-frame fade">
+        <h1 style="font-size:20px; letter-spacing:.10em; margin-bottom:32px; margin-top:-56px;">HOUSE OF ETERNITY</h1>
+
+        <div class="door-row" aria-label="문 선택">
+          <div class="door" role="button" tabindex="0" data-route="#/info">
+            <span class="label">INFORMATION</span>
+            <span class="handle"></span>
+          </div>
+          <div class="door" role="button" tabindex="0" data-route="#/perks">
+            <span class="label">NOTICE</span>
+            <span class="handle"></span>
+          </div>
+          <div class="door" role="button" tabindex="0" data-route="#/program">
+            <span class="label">PROGRAM</span>
+            <span class="handle"></span>
+          </div>
+          <div class="door" role="button" tabindex="0" data-route="#/faq">
+            <span class="label">Q&A</span>
+            <span class="handle"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- VIEW: Room - Info -->
+  <main class="view" id="view-info" data-view>
+    <section class="room" aria-label="운영 안내">
+      <div class="fade">
+        <div class="room-head">
+          <h1>이벤트 카페 안내</h1>
+          <p class="hint">블루로그 in 합정</p>
+        </div>
+
+        <div class="info-grid">
+          <div class="block">
+            <h2>운영 시간</h2>
+            <p>26.01.09(금) 12:00 – 20:00<br>
+            26.01.10(토) 12:00 - 17:00</p>
+          </div>
+          <div class="block">
+            <h2>위치</h2>
+            <p>서울 마포구 토정로 27-1 3층<br>
+            <a href="https://naver.me/5xjp0QW3">블루로그 네이버지도</a></p>
+          </div>
+          <div class="block">
+            <h2>오시는 길</h2>
+            <p>합정역 7번 출구 도보 6분</p>
+          </div>
+          <div class="block">
+            <h2>모든 문의</h2>
+            <p>인스타그램, X<br> 
+               @redoor_eventeam</p>
+          </div>
+        </div>
+
+        <p class="note">
+          <h3>카페 기본 공지</h3>
+          <p class="lead" style="margin-top:12px; margin-bottom:12px; color: var(--muted);">
+          금요일, 토요일 운영시간이 다릅니다.<br>
+          주차는 불가합니다. 대중교통을 이용해주세요.<br>
+          1인 1메뉴 필수입니다. 미구매시 입장 제한 있습니다.<br>
+          반드시 모든 문의는 카페가 아닌, X와 인스타그램 (@redoor_eventeam)으로 DM 부탁드립니다.<br><br><p>
+          <h3>카페 줄서기 안내</h3>
+          <p class="lead" style="margin-top:12px; margin-bottom:12px; color: var(--muted);">
+          오픈 전 장시간 대기는 삼가해주세요.<br>
+          줄서는 방법에 대한 안내는 행사 직전 공지합니다.<br>
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- VIEW: Room - Program -->
+  <main class="view" id="view-program" data-view>
+    <section class="room" aria-label="프로그램">
+      <div class="fade">
+        <div class="room-head">
+          <h1>프로그램</h1>
+          <p class="hint">눌러서 열기/닫기</p>
+        </div>
+
+        <div class="door-row" aria-label="프로그램 문">
+          <div class="door program-door" role="button" tabindex="0" aria-label="프로그램 A 열기" aria-expanded="false">
+            <div class="door-back">
+              <p><strong>리도어 고사</strong></p>
+              <p style="margin-top:10px; color: rgba(0,0,0,.72);">기준점 이상 받을 시, 선물 증정</p>
+            </div>
+            <div class="door-leaf" aria-hidden="true">
+              <span class="handle"></span>
+            </div>
+          </div>
+
+          <div class="door program-door" role="button" tabindex="0" aria-label="프로그램 B 열기" aria-expanded="false">
+            <div class="door-back">
+              <p><strong>리도어 네컷</strong></p>
+              <p style="margin-top:10px; color: rgba(0,0,0,.72);">리도어와 함께하는 네컷 프레임 📷<br>
+                  자체제작한 프레임이 준비되어 있습니다. <br>
+                  기념 촬영하고 가세요! <br>
+                  별도의 인화는 없습니다. 사진 찍고 폰에 저장해 가세요☆</p>
+            </div>
+            <div class="door-leaf" aria-hidden="true">
+              <span class="handle"></span>
+            </div>
+          </div>
+
+          <div class="door program-door" role="button" tabindex="0" aria-label="프로그램 C 열기" aria-expanded="false">
+            <div class="door-back">
+              <p><strong>방명록</strong></p>
+              <p style="margin-top:10px; color: rgba(0,0,0,.72);">카페 내 준비된 큐알코드를 찍으면 모두가 볼 수 있는 방명록이 나옵니다.<br>
+                  p.s 리둥이의 놀이터</p>
+            </div>
+            <div class="door-leaf" aria-hidden="true">
+              <span class="handle"></span>
+            </div>
+          </div>
+
+          <div class="door program-door" role="button" tabindex="0" aria-label="프로그램 D 열기" aria-expanded="false">
+            <div class="door-back">
+              <p><strong>???</strong></p>
+              <p style="margin-top:10px; color: rgba(0,0,0,.72);">???</p>
+            </div>
+            <div class="door-leaf" aria-hidden="true">
+              <span class="label">???</span>
+              <span class="handle"></span>
+            </div>
+          </div> 
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- VIEW: Room - notice -->
+  <main class="view" id="view-perks" data-view>
+    <section class="room" aria-label="특전">
+      <div class="fade">
+        <h1>공지</h1>
+        <h2>이용 안내</h2>
+        <p class="lead" style="margin-top:12px; margin-bottom:12px; color: var(--muted);">
+        1인 1메뉴 구매 필수입니다. (미구매시 입장 제한)<br>
+        동시간대 수용 인원이 정해져 있습니다.<br>
+        혼잡할 경우 야외 대기가 발생할 수 있으며, 카페 이용 시간을 제한합니다.<br>
+        퇴장시, 재입장은 불가합니다. (재입장시 음료 구매 필수)<br>
+        유동적으로 운영될 수 있으며, 바로 공지합니다.<br>
+        이슈 발생시, 상주하고 있는 스태프의 지시를 따라주세요.<br>
+        디피된 오브제는 주최진들의 소중한 자산입니다.<br>
+        반드시 눈으로만 봐주세요. 양해 부탁드립니다.<br>
+
+
+        <h2>특전 안내</h2>
+        <p class="lead" style="margin-top:12px; margin-bottom:12px; color: var(--muted);">
+        입장 특전 : '음료'만 구매<br>
+        럭드 특전 : '음료 + 쿠키' 구매<br><br>
+        <h4>메뉴판</h4>
+        <p class="lead" style="margin-top:-2px; margin-bottom:12px; color: var(--muted);">
+        흑백동화 (콜드브루) 6,000원<br>
+        내 방안은 푸른 바다 (블루레몬에이드) 7,000원<br>
+        영원은 그렇듯 (청포도에이드) 7,000원<br>
+        초코 쿠키 4,000원<br><br></p>
+
+        <h2>럭키드로우 안내</h2>
+         <p class="lead" style="margin-top:12px; margin-bottom:12px; color: var(--muted);">
+        럭키드로우는 1일 25개 판매합니다.<br>
+        준비된 럭키드로우는 조기 소진될 수 있습니다.<br>
+        럭드 특전 품절시, 음료 특전만 구매 가능합니다.<br>
+        추가금 받는 럭키드로우는 제공 안합니다.<br><p>
+
+        <h3>럭드 상품 수령 안내(필독)</h3>
+         <p class="lead" style="margin-top:-5px; margin-bottom:12px; color: var(--muted);">
+        '내 방안은 푸른 바다' 패브릭 포스터<br>
+        '영원은 그렇듯' 카세트 테이프<br>
+        'Wanna Be' CD<br>
+        '내 방안은 푸른 바다' CD<br>
+        위 상품 수령자는 간단한 서약서(계약서X) 작성을 하고, 상품을 수령합니다. (플미 양도 방지 목적)<br>
+        위 상품들은 현재 심한 프리미엄 거래가 이루어지고 있는 상품들입니다. 따라서, 지속적으로 모니터링 할 예정입니다.<br>
+        양도 목적의 방문이라면, 정말 죄송하지만 방문 지양해주시면 감사하겠습니다.<br>
+        다른 팬분들께 기회를 드리기 위함으로 양해부탁드립니다. 감사합니다. <br><p>
+      </div>
+    </section>
+  </main>
+
+  <!-- VIEW: Room - FAQ -->
+  <main class="view" id="view-faq" data-view>
+    <section class="room" aria-label="FAQ">
+      <div class="fade">
+        <h2>Q&A</h2>
+        <p class="lead" style="margin-top:12px; color: var(--muted);">질문들어올 때마다 업데이트합니다. </p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © REDOOR 5TH ANNIVERSARY<br>— House of Eternity
+  </footer>
+
+</div>
+
+<div class="corridor" aria-label="복도 네비게이션">
+  <button id="backBtn" type="button" aria-label="뒤로">←</button>
+  <div class="where" id="where">영원의 집</div>
+  <button id="forwardBtn" type="button" aria-label="앞으로">→</button>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  var views = {
+    entrance: document.getElementById('view-entrance'),
+    hall: document.getElementById('view-hall'),
+    info: document.getElementById('view-info'),
+    program: document.getElementById('view-program'),
+    perks: document.getElementById('view-perks'),
+    faq: document.getElementById('view-faq')
+  };
+
+  var flash = document.getElementById('flash');
+  var whereEl = document.getElementById('where');
+  var backBtn = document.getElementById('backBtn');
+  var forwardBtn = document.getElementById('forwardBtn');
+
+  function setActive(name){
+    var k;
+    for(k in views){
+      if(Object.prototype.hasOwnProperty.call(views, k) && views[k]){
+        views[k].classList.remove('is-active');
+      }
+    }
+    if(views[name]) views[name].classList.add('is-active');
+
+    if(whereEl){
+      var map = { entrance:'입구', hall:'영원의 집', info:'기본 안내', program:'프로그램', perks:'공지', faq:'Q&A' };
+      whereEl.textContent = map[name] || '영원의 집';
+    }
+  }
+
+  function routeFromHash(hash){
+    var h = (hash !== undefined && hash !== null ? hash : location.hash) || '#/';
+    if(h === '#/' || h === '#') return 'entrance';
+    if(h === '#/hall') return 'hall';
+    if(h === '#/info') return 'info';
+    if(h === '#/program') return 'program';
+    if(h === '#/perks') return 'perks';
+    if(h === '#/faq') return 'faq';
+    return 'entrance';
+  }
+
+  function goto(hash){
+    setActive(routeFromHash(hash));
+    location.hash = hash;
+    window.scrollTo(0, 0);
+  }
+
+  // Gate reset handler must be accessible from onRouteChange
+  // (default no-op; replaced by gate module after it initializes)
+  var resetGate = function(){};
+
+  function onRouteChange(){
+    var current = routeFromHash();
+    setActive(current);
+    window.scrollTo(0, 0);
+
+    // When returning to entrance, ensure the gate is closed and clickable again
+    if(current === 'entrance'){
+      resetGate();
+    }
+  }
+
+  // Gate open: 반드시 "열리는 모션"을 보여준 뒤 복도로 이동
+  (function initGate(){
+    var gateDoor = document.getElementById('gateDoor');
+    if(!gateDoor) return;
+
+    var opened = false;
+
+    resetGate = function(){
+      opened = false;
+      document.body.classList.remove('gate-open');
+    };
+
+    function openGate(){
+      if(opened) return;
+      opened = true;
+
+      // 1) Start door motion
+      document.body.classList.add('gate-open');
+
+      // 2) After the door has visibly started opening, flash + go to hall
+      setTimeout(function(){
+        if(flash){
+          flash.classList.add('is-on');
+          setTimeout(function(){ flash.classList.remove('is-on'); }, 120);
+        }
+        goto('#/hall');
+      }, 520);
+    }
+
+    gateDoor.addEventListener('click', openGate);
+    gateDoor.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openGate(); }
+    });
+  })();
+
+  // Hall doors navigation
+  function bindRoute(el){
+    var r = el.getAttribute('data-route');
+    if(!r) return;
+    function activate(){ goto(r); }
+    el.addEventListener('click', function(){ activate(); });
+    el.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); activate(); }
+    });
+  }
+
+  // Program door toggle (open / close)
+  function bindProgramDoor(el){
+    var open = false;
+    function toggleDoor(){
+      open = !open;
+      el.classList.toggle('is-open', open);
+      el.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    el.addEventListener('click', function(){ toggleDoor(); });
+    el.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleDoor(); }
+    });
+  }
+
+  var routeNodes = document.querySelectorAll('[data-route]');
+  for(var i=0;i<routeNodes.length;i++) bindRoute(routeNodes[i]);
+
+  var programDoors = document.querySelectorAll('.program-door');
+  for(var j=0;j<programDoors.length;j++) bindProgramDoor(programDoors[j]);
+
+  // Corridor behavior
+  if(backBtn) backBtn.addEventListener('click', function(){ history.back(); });
+  if(forwardBtn) forwardBtn.addEventListener('click', function(){ history.forward(); });
+
+  // Routing events
+  window.addEventListener('hashchange', onRouteChange);
+  window.addEventListener('popstate', onRouteChange);
+
+  // Init route
+  if(!location.hash){ location.hash = '#/'; }
+  setActive(routeFromHash());
+
+  // --- Minimal test cases (console) ---
+  function assert(cond, msg){
+    if(!cond) throw new Error('Test failed: ' + msg);
+  }
+
+  (function runTests(){
+    try{
+      assert(routeFromHash('#/') === 'entrance', 'routeFromHash entrance');
+      assert(routeFromHash('#/hall') === 'hall', 'routeFromHash hall');
+      assert(routeFromHash('#/info') === 'info', 'routeFromHash info');
+      assert(routeFromHash('#/program') === 'program', 'routeFromHash program');
+      assert(routeFromHash('#/perks') === 'perks', 'routeFromHash perks');
+      assert(routeFromHash('#/faq') === 'faq', 'routeFromHash faq');
+
+      var keys = ['entrance','hall','info','program','perks','faq'];
+      for(var k=0; k<keys.length; k++){
+        assert(!!views[keys[k]], 'view exists: ' + keys[k]);
+      }
+
+      // resetGate should exist and be callable
+      assert(typeof resetGate === 'function', 'resetGate is a function');
+
+      // goto uses hash and should not throw
+      var before = location.hash;
+      goto('#/hall');
+      assert(location.hash === '#/hall', 'goto updates hash');
+      location.hash = before;
+
+      // Program doors should toggle class
+      var pd = document.querySelector('.program-door');
+      assert(!!pd, 'program door exists');
+      var had = pd.classList.contains('is-open');
+      pd.dispatchEvent(new MouseEvent('click', {bubbles:true, cancelable:true}));
+      assert(pd.classList.contains('is-open') !== had, 'program door toggles');
+      pd.dispatchEvent(new MouseEvent('click', {bubbles:true, cancelable:true}));
+
+      console.log('[OK] tests passed');
+    }catch(e){
+      console.warn(e);
+    }
+  })();
+})();
+</script>
+
+</body>
+</html>
