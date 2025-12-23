@@ -238,6 +238,40 @@ body.gate-open .gate-glow{ opacity: 0.9; width: 22px; }
   color: #394DD4;         
 }
 
+  /* Q&A */
+.qa-list{
+  margin-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+.qa-item{
+  border-bottom: 1px solid var(--line);
+}
+
+.qa-question{
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--fg);
+  text-align: left;
+  padding: 16px 0;
+  font-size: 14px;
+  letter-spacing: .04em;
+  cursor: pointer;
+}
+
+.qa-answer{
+  display: none;
+  padding: 0 0 16px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.qa-item.is-open .qa-answer{
+  display: block;
+}
+
 /* LEFT column doors: hinge on LEFT, open to the LEFT */
 .program-door:nth-child(odd) .door-leaf{ transform-origin: left center; }
 .program-door:nth-child(odd).is-open .door-leaf{ transform: perspective(1200px) rotateY(-120deg); }
@@ -490,6 +524,16 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
       <div class="fade">
         <h2>Q&A</h2>
         <p class="lead" style="margin-top:12px; color: var(--muted);">질문들어올 때마다 업데이트합니다. </p>
+      <div class="qa-list">
+
+  <div class="qa-item">
+    <button class="qa-question">
+      Q. 네컷은 무료인가요?
+    </button>
+    <div class="qa-answer">
+      네, 네컷은 무료로 참여 가능합니다. 다만, 별도의 인화는 없습니다.
+    </div>
+  </div>
       </div>
     </section>
   </main>
@@ -637,6 +681,18 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
   var programDoors = document.querySelectorAll('.program-door');
   for(var j=0;j<programDoors.length;j++) bindProgramDoor(programDoors[j]);
 
+  // Q&A toggle
+var qaItems = document.querySelectorAll('.qa-item');
+
+for(var q=0; q<qaItems.length; q++){
+  (function(item){
+    var btn = item.querySelector('.qa-question');
+    btn.addEventListener('click', function(){
+      item.classList.toggle('is-open');
+    });
+  })(qaItems[q]);
+}
+
   // Corridor behavior
   if(backBtn) backBtn.addEventListener('click', function(){ history.back(); });
   if(forwardBtn) forwardBtn.addEventListener('click', function(){ history.forward(); });
@@ -695,6 +751,7 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
 
 </body>
 </html>
+
 
 
 
