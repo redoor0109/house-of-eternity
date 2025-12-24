@@ -37,15 +37,12 @@ h2{font-size:22px;letter-spacing:.08em;margin:0}
 p{margin:0}
 @media(max-width:640px){ h1{font-size:34px;} }
 
-/* Views */
 .view{ display:none; min-height: calc(100vh - 24px); }
 .view.is-active{ display:block; }
 
-/* Fade transition helper */
 .fade{ opacity:0; transform: translateY(6px); transition: opacity .25s ease, transform .25s ease; }
 .view.is-active .fade{ opacity:1; transform: translateY(0); }
 
-/* Flash overlay (for gate transition) */
 .flash{
   position:fixed;
   inset:0;
@@ -57,7 +54,6 @@ p{margin:0}
 }
 .flash.is-on{ opacity:1; }
 
-/* Entrance hero */
 .hero{
   display:flex;
   flex-direction:column;
@@ -94,7 +90,6 @@ p{margin:0}
   margin-top: 10px;
 }
 
-/* Gate */
 .entrance{ padding-top: 0; text-align:center; }
 .gate-wrap{
   margin-top: 120px;
@@ -111,7 +106,6 @@ p{margin:0}
   position: relative;
 }
 
-/* Door */
 .gate-door{
   width: 160px;
   height: 260px;
@@ -124,10 +118,8 @@ p{margin:0}
 }
 .gate-door:hover{ transform: perspective(900px) rotateY(-6deg); }
 
-/* When opening */
 body.gate-open .gate-door{ transform: perspective(900px) rotateY(-72deg); }
 
-/* Handle */
 .gate-handle{
   position:absolute;
   right: 22px;
@@ -139,7 +131,6 @@ body.gate-open .gate-door{ transform: perspective(900px) rotateY(-72deg); }
   transform: translateY(-50%);
 }
 
-/* Light glow from the gap */
 .gate-glow{
   position:absolute;
   left: -2px;
@@ -152,23 +143,20 @@ body.gate-open .gate-door{ transform: perspective(900px) rotateY(-72deg); }
 }
 body.gate-open .gate-glow{ opacity: 0.9; width: 22px; }
 
-/* Hall */
 .hall{ padding-top: 72px; text-align:center; }
 .hall-frame{ max-width: 420px; margin: 0 auto; padding: 12px 20px 24px; border: none; }
 
-/* Door grid (mobile-first) */
 .door-row{
   display:grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px; /* mobile tighter spacing */
+  gap: 12px; 
 }
 
-/* Base door tile */
 .door{
   position:relative;
   border:1px solid var(--line);
   padding:0;
-  height:250px; /* mobile-optimized height */
+  height:250px; 
   cursor:pointer;
   transition: transform .2s ease, border-color .2s ease;
   background:var(--fg);
@@ -205,7 +193,6 @@ body.gate-open .gate-glow{ opacity: 0.9; width: 22px; }
 
 .door:hover{ transform:translateY(-2px); border-color:#000; }
 
-/* Program: door leaf rotates fully, content sits BEHIND */
 .program-door{ background: transparent; }
 
 .program-door .door-back{
@@ -238,7 +225,6 @@ body.gate-open .gate-glow{ opacity: 0.9; width: 22px; }
   color: #394DD4;         
 }
 
-  /* Q&A */
 .qa-list{
   margin-top: 24px;
   border-top: 1px solid var(--line);
@@ -272,18 +258,14 @@ body.gate-open .gate-glow{ opacity: 0.9; width: 22px; }
   display: block;
 }
 
-/* LEFT column doors: hinge on LEFT, open to the LEFT */
 .program-door:nth-child(odd) .door-leaf{ transform-origin: left center; }
 .program-door:nth-child(odd).is-open .door-leaf{ transform: perspective(1200px) rotateY(-120deg); }
 
-/* RIGHT column doors: hinge on RIGHT, open to the RIGHT */
 .program-door:nth-child(even) .door-leaf{ transform-origin: right center; }
 .program-door:nth-child(even).is-open .door-leaf{ transform: perspective(1200px) rotateY(120deg); }
 
-/* Reveal content only when opened */
 .program-door.is-open .door-back{ opacity:1; pointer-events:auto; }
 
-/* Rooms */
 .room{ padding-top: 60px; }
 .room-head{ margin-bottom: 30px; display:flex; justify-content:space-between; align-items:baseline; gap: 12px; }
 .hint{ font-size:12px; color: var(--muted); }
@@ -296,7 +278,6 @@ body.gate-open .gate-glow{ opacity: 0.9; width: 22px; }
 
 footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center; color:var(--muted); }
 
-/* Corridor */
 .corridor{
   position:fixed;
   left:0;right:0;bottom:0;
@@ -324,7 +305,6 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
 
 <div class="container">
 
-  <!-- VIEW: Entrance (gate) -->
   <main class="view is-active" id="view-entrance" data-view>
     <section class="entrance" aria-label="영원의 집 입구">
       <div class="hero fade">
@@ -374,7 +354,6 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
     </section>
   </main>
 
-  <!-- VIEW: Room - Info -->
   <main class="view" id="view-info" data-view>
     <section class="room" aria-label="운영 안내">
       <div class="fade">
@@ -421,7 +400,6 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
     </section>
   </main>
 
-  <!-- VIEW: Room - Program -->
   <main class="view" id="view-program" data-view>
     <section class="room" aria-label="프로그램">
       <div class="fade">
@@ -443,11 +421,8 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
 
           <div class="door program-door" role="button" tabindex="0" aria-label="프로그램 B 열기" aria-expanded="false">
             <div class="door-back">
-              <p><strong>리도어 네컷</strong></p>
-              <p style="margin-top:10px; color: rgba(0,0,0,.72);">리도어와 함께하는 네컷 프레임<br>
-                  자체제작한 프레임이 준비되어 있습니다.<br>
-                  기념 촬영하고 가세요 📸 <br>
-                  별도의 인화는 없습니다.<br> 사진 찍고 폰에 저장해 가세요☆</p>
+              <p><strong></strong></p>
+              <p style="margin-top:10px; color: rgba(0,0,0,.72);">대체 예정</p>
             </div>
             <div class="door-leaf" aria-hidden="true">
               <span class="handle"></span>
@@ -480,7 +455,6 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
     </section>
   </main>
 
-  <!-- VIEW: Room - notice -->
   <main class="view" id="view-perks" data-view>
     <section class="room" aria-label="특전">
       <div class="fade">
@@ -518,7 +492,6 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
     </section>
   </main>
 
-  <!-- VIEW: Room - FAQ -->
   <main class="view" id="view-faq" data-view>
     <section class="room" aria-label="FAQ">
       <div class="fade">
@@ -528,10 +501,21 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
 
   <div class="qa-item">
     <button class="qa-question">
-      Q. 네컷은 무료인가요?
+      Q. 네컷 진행은 안하나요?
     </button>
     <div class="qa-answer">
-      네, 네컷은 무료로 참여 가능합니다. 다만, 별도의 인화는 없습니다.
+      네. 처음 공개했을 때는 진행 예정이었으나, 다른 이슈로 진행하지 않습니다.
+    </div>
+    <button class="qa-question">
+      Q. 음료 + 쿠키 구매하면 입장특전은 못받는 것인가요?
+    </button>
+    <div class="qa-answer">
+      음료가 입장특전이기에, 받으실 수 있습니다. 럭드특전에 입장특전이 포함됩니다.
+    <button class="qa-question">
+      Q. 나눔존이 있나요?
+    </button>
+    <div class="qa-answer">
+      나눔존 준비해놓겠습니다. 나눔하기를 원하시는 분들은 나눔존에 놓고 가시면 되고, 방문하시는 팬분들은 자유롭게 이용가능하십니다.
     </div>
   </div>
       </div>
@@ -600,8 +584,6 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
     window.scrollTo(0, 0);
   }
 
-  // Gate reset handler must be accessible from onRouteChange
-  // (default no-op; replaced by gate module after it initializes)
   var resetGate = function(){};
 
   function onRouteChange(){
@@ -609,13 +591,12 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
     setActive(current);
     window.scrollTo(0, 0);
 
-    // When returning to entrance, ensure the gate is closed and clickable again
+
     if(current === 'entrance'){
       resetGate();
     }
   }
 
-  // Gate open: 반드시 "열리는 모션"을 보여준 뒤 복도로 이동
   (function initGate(){
     var gateDoor = document.getElementById('gateDoor');
     if(!gateDoor) return;
@@ -631,10 +612,8 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
       if(opened) return;
       opened = true;
 
-      // 1) Start door motion
       document.body.classList.add('gate-open');
 
-      // 2) After the door has visibly started opening, flash + go to hall
       setTimeout(function(){
         if(flash){
           flash.classList.add('is-on');
@@ -650,7 +629,6 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
     });
   })();
 
-  // Hall doors navigation
   function bindRoute(el){
     var r = el.getAttribute('data-route');
     if(!r) return;
@@ -661,7 +639,6 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
     });
   }
 
-  // Program door toggle (open / close)
   function bindProgramDoor(el){
     var open = false;
     function toggleDoor(){
@@ -681,7 +658,6 @@ footer{ padding:48px 0 96px; border-top:1px solid var(--line); text-align:center
   var programDoors = document.querySelectorAll('.program-door');
   for(var j=0;j<programDoors.length;j++) bindProgramDoor(programDoors[j]);
 
-  // Q&A toggle
 var qaItems = document.querySelectorAll('.qa-item');
 
 for(var q=0; q<qaItems.length; q++){
@@ -693,19 +669,15 @@ for(var q=0; q<qaItems.length; q++){
   })(qaItems[q]);
 }
 
-  // Corridor behavior
   if(backBtn) backBtn.addEventListener('click', function(){ history.back(); });
   if(forwardBtn) forwardBtn.addEventListener('click', function(){ history.forward(); });
 
-  // Routing events
   window.addEventListener('hashchange', onRouteChange);
   window.addEventListener('popstate', onRouteChange);
 
-  // Init route
   if(!location.hash){ location.hash = '#/'; }
   setActive(routeFromHash());
 
-  // --- Minimal test cases (console) ---
   function assert(cond, msg){
     if(!cond) throw new Error('Test failed: ' + msg);
   }
@@ -724,16 +696,13 @@ for(var q=0; q<qaItems.length; q++){
         assert(!!views[keys[k]], 'view exists: ' + keys[k]);
       }
 
-      // resetGate should exist and be callable
       assert(typeof resetGate === 'function', 'resetGate is a function');
 
-      // goto uses hash and should not throw
       var before = location.hash;
       goto('#/hall');
       assert(location.hash === '#/hall', 'goto updates hash');
       location.hash = before;
 
-      // Program doors should toggle class
       var pd = document.querySelector('.program-door');
       assert(!!pd, 'program door exists');
       var had = pd.classList.contains('is-open');
@@ -751,6 +720,7 @@ for(var q=0; q<qaItems.length; q++){
 
 </body>
 </html>
+
 
 
 
